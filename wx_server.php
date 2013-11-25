@@ -235,19 +235,21 @@ class WX{
 				"Content"     =>  $D['Content'],
 				"CreateTime"  =>  $D['CreateTime'],
 			);
-			$Uinfo = $this->isUser($userD);
 
-			$name  = !empty($Uinfo['remarkName']) ? $Uinfo['remarkName'] : $Uinfo['deName'];
+			$Uinfo    =  $this->isUser($userD);
+			$name     =  !empty($Uinfo['remarkName']) ? $Uinfo['remarkName'] : $Uinfo['deName'];
+			$wallUrl  =  "http://wx.xingkong.us/?ID=".$userD['ID'];
+
 			if($this->dbtalk($Uinfo, $userD)){
 				if(!empty($Uinfo)){
 					$S['type'] = "text";
-				    $S['Content'] = $Uinfo['name']."\r\n"."您的消息已上墙"."\r\n"."发送频率为1分钟一次"."\r\n"."微博墙地址：http://wx.xingkong.us";
+				    $S['Content'] = $Uinfo['name']."\r\n"."您的消息已上墙"."\r\n"."发送频率为1分钟一次"."\r\n"."微博墙地址：$wallUrl";
 				}
 				$this->socketView(array("ID" => $userD['ID'], "fakeId" => $Uinfo['fakeid'], "name" => $name, "super" => $Uinfo['super'], "msg" => $userD['Content']));
 			}else{
 				if(!empty($Uinfo)){
 					$S['type'] = "text";
-				    $S['Content'] = $Uinfo['name']."\r\n"."不要贪心喔~"."\r\n"."发送频率为1分钟一次！"."\r\n"."微博墙地址：http://wx.xingkong.us";
+				    $S['Content'] = $Uinfo['name']."\r\n"."不要贪心喔~"."\r\n"."发送频率为1分钟一次！"."\r\n"."微博墙地址：$wallUrl";
 				}
 			}
 			$this->sendMsg($S, $D);
@@ -266,7 +268,7 @@ class WX{
 		$last_time  = $_tmp[0]['last_date'];
 		$tmp_time   = $time-$last_time;
 
-		if($tmp_time >= 1*60){  //1分钟发一次
+		if($tmp_time >= 1*60 || $U['fakeid'] == "67263985"){  //1分钟发一次
 			DB::UP("name", "last_date='$time', MsgNum=MsgNum+1", "ID='$U[ID]'");
 			DB::IN("txt", "UserGroup, UserID, Type, text, date", "'$_D[ID]', '$U[ID]', '$_D[type]', '$_D[Content]', '$time'");
 			return true;
